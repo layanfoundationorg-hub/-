@@ -1,0 +1,20 @@
+{
+  "name": "صحة - إدخال البيانات",
+  "short_name": "إدخال صحة",
+  "start_url": "system_config.html",
+  "display": "standalone",
+  "background_color": "#123469",
+  "theme_color": "#123469",
+  "icons": [
+    {
+      "src": "logo_header.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo_header.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

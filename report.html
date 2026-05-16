@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صحة - منصة الخدمات الصحية</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #306db5;
+            --navy: #123469;
+            --border: #d1d1d1;
+            --bg-label: #fdfdfd;
+            --text-value: #1a3a63;
+        }
+
+        .arabic-text {
+            display: inline-block;
+            direction: rtl;
+            unicode-bidi: plaintext;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Cairo', 'Inter', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .report-paper {
+            width: 210mm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 4mm 12mm;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
+            margin-bottom: 14px;
+            border: 1.2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            border: 0.5px solid var(--border);
+            padding: 6px 6px;
+            font-size: 11.5px;
+            vertical-align: middle;
+            line-height: 1.3;
+            text-align: center;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .label-ar {
+            width: 16%;
+            color: var(--primary);
+            font-weight: 800;
+            background: var(--bg-label);
+        }
+
+        .label-en {
+            width: 16%;
+            color: var(--primary);
+            font-weight: 700;
+            background: var(--bg-label);
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .value-ar,
+        .value-en,
+        .value-center,
+        .value-center-blue {
+            color: var(--text-value);
+            font-weight: 600;
+        }
+
+        .highlight-row th,
+        .highlight-row td {
+            background-color: var(--navy) !important;
+            color: white !important;
+            border-color: var(--navy);
+        }
+
+        .footer-section {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .verify-col {
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .verify-text {
+            font-size: 11px;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .hospital-col {
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .print-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 35px;
+            border-radius: 100px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .print-btn {
+            background: #123469;
+            color: white;
+            border: none;
+            padding: 14px 45px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media print {
+            .print-controls {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-msg" style="margin-top:15px; font-weight:bold;">جاري تحميل البيانات...</div>
+    </div>
+
+    <div class="print-controls">
+        <button class="print-btn" onclick="downloadPDF()">
+            <span>⬇</span> تنزيل التقرير (PDF)
+        </button>
+    </div>
+
+    <div class="report-paper" id="report-content">
+        <div class="header-container"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; direction: ltr;">
+            <div class="header-left" style="width: 30%;">
+                <img src="logo_header.png" style="height: 70px; width: auto;">
+            </div>
+            <div class="header-center" style="width: 40%; text-align: center;">
+                <img src="report_header_text_new.png" style="width: 100%; height: auto;">
+            </div>
+            <div class="header-right" style="width: 30%; text-align: right;">
+                <img src="mesh_header.png.png" style="width: 100%; height: auto;">
+            </div>
+        </div>
+
+        <table id="data-table">
+            <tr>
+                <th class="label-ar">رمز الإجازة</th>
+                <td colspan="2" class="value-center-blue" id="v-id">--</td>
+                <th class="label-en">Leave ID</th>
+            </tr>
+            <tr class="highlight-row">
+                <th class="label-ar">مدة الإجازة</th>
+                <td class="value-ar" id="v-dur-ar">--</td>
+                <td class="value-en" id="v-dur-en">--</td>
+                <th class="label-en">Leave Duration</th>
+            </tr>
+            <tr>
+                <th class="label-ar">تاريخ الدخول</th>
+                <td class="value-ar" id="v-adm-ar">--</td>
+                <td class="value-en" id="v-adm-en">--</td>
+                <th class="label-en">Admission Date</th>
+            </tr>
+            <tr>
+                <th class="label-ar">تاريخ الخروج</th>
+                <td class="value-ar" id="v-dis-ar">--</td>
+                <td class="value-en" id="v-dis-en">--</td>
+                <th class="label-en">Discharge Date</th>
+            </tr>
+            <tr>
+                <th class="label-ar">تاريخ إصدار التقرير</th>
+                <td colspan="2" class="value-center" id="v-iss">--</td>
+                <th class="label-en">Issue Date</th>
+            </tr>
+            <tr>
+                <th class="label-ar">الاسم</th>
+                <td class="value-ar" id="v-name-ar">--</td>
+                <td class="value-en" id="v-name-en">--</td>
+                <th class="label-en">Name</th>
+            </tr>
+            <tr>
+                <th class="label-ar">رقم الهوية / الإقامة</th>
+                <td colspan="2" class="value-center-blue" id="v-nid">--</td>
+                <th class="label-en">National ID / Iqama</th>
+            </tr>
+            <tr>
+                <th class="label-ar">الجنسية</th>
+                <td class="value-ar" id="v-nat-ar">--</td>
+                <td class="value-en" id="v-nat-en">--</td>
+                <th class="label-en">Nationality</th>
+            </tr>
+            <tr>
+                <th class="label-ar">جهة العمل</th>
+                <td colspan="2" class="value-center" id="v-emp">--</td>
+                <th class="label-en">Employer</th>
+            </tr>
+            <tr>
+                <th class="label-ar">اسم الممارس</th>
+                <td class="value-ar" id="v-pra-ar">--</td>
+                <td class="value-en" id="v-pra-en">--</td>
+                <th class="label-en">Practitioner Name</th>
+            </tr>
+            <tr>
+                <th class="label-ar">المسمى الوظيفي</th>
+                <td class="value-ar" id="v-pos-ar">--</td>
+                <td class="value-en" id="v-pos-en">--</td>
+                <th class="label-en">Position</th>
+            </tr>
+        </table>
+
+        <div class="footer-section">
+            <div class="hospital-col">
+                <img src="moh_logo.png.png" class="moh-logo" style="height: 180px; width: auto;">
+                <div class="hospital-name" style="margin-top: 10px;">
+                    <div id="v-hosp-ar" style="font-size: 15px; font-weight: bold;"></div>
+                    <div id="v-hosp-en" style="font-size: 14px; font-family: 'Inter';"></div>
+                </div>
+                <img src="nhic_logo_new.png" class="nhic-logo-footer"
+                    style="height: 150px; width: auto; margin-top: 10px;">
+            </div>
+            <div class="verify-col">
+                <div id="qr-code-img" style="margin-bottom: 12px;"></div>
+                <div class="verify-text">
+                    للتحقق من بيانات التقرير يرجى التأكد من زيارة موقع منصة صحة الرسمي<br>
+                    <span style="font-family: 'Inter'; font-size: 10px;">To check the report please visit Seha's
+                        official website</span><br>
+                    <a href="https://seha-ux.github.io/seha-ux/" style="color: blue;">seha-ux.github.io/seha-ux/</a>
+                </div>
+                <div id="p-time" style="margin-top: 15px; font-weight: bold;">--</div>
+                <div id="p-date" style="font-weight: bold;">--</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKhcyjYfvibFJJXzy0hxT6CnmmL5gbBZYI5gBnTrmvy_6gvNNUjnlK-qXTzWsyGly9SA/exec';
+        const urlParams = new URLSearchParams(window.location.search);
+        const leaveId = urlParams.get('id');
+
+        function gregorianToHijri(d) {
+            if (!d) return "--";
+            let day = d.getDate(), month = d.getMonth() + 1, year = d.getFullYear();
+            let jd = Math.floor((1461 * (year + 4800 + Math.floor((month - 14) / 12))) / 4) + Math.floor((367 * (month - 2 - 12 * (Math.floor((month - 14) / 12)))) / 12) - Math.floor((3 * (Math.floor((year + 4900 + Math.floor((month - 14) / 12)) / 100))) / 4) + day - 32075;
+            let l = jd - 1948440 + 10632, n = Math.floor((l - 1) / 10631);
+            l = l - 10631 * n + 354;
+            let j = (Math.floor((10985 - l) / 5316)) * (Math.floor((50 * l) / 17719)) + (Math.floor(l / 5670)) * (Math.floor((43 * l) / 15238));
+            l = l - (Math.floor((30 - j) / 15)) * (Math.floor((17719 * j) / 50)) - (Math.floor(j / 16)) * (Math.floor((15238 * j) / 43)) + 29;
+            month = Math.floor((24 * l) / 709); day = l - Math.floor((709 * month) / 24); year = 30 * n + j - 30;
+            return `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`;
+        }
+
+        function parseSmartDate(dateStr) {
+            if (!dateStr || dateStr === "--") return null;
+            let d = new Date(dateStr);
+            if (isNaN(d.getTime())) {
+                const parts = dateStr.split('-');
+                if (parts.length === 3) d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            }
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        function processData(data) {
+            document.getElementById('v-id').innerText = data.leaveId;
+            const admD = parseSmartDate(data.admissionDate), disD = parseSmartDate(data.dischargeDate);
+            const fmtG = (d) => d ? `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}` : "--";
+
+            document.getElementById('v-adm-en').innerText = fmtG(admD);
+            document.getElementById('v-adm-ar').innerText = gregorianToHijri(admD);
+            document.getElementById('v-dis-en').innerText = fmtG(disD);
+            document.getElementById('v-dis-ar').innerText = gregorianToHijri(disD);
+            document.getElementById('v-iss').innerText = fmtG(parseSmartDate(data.issueDate));
+
+            const admG = fmtG(admD), disG = fmtG(disD);
+            const durRaw = data.duration || "--";
+            const durNum = durRaw.split('/')[0].trim();
+            const durEn = durRaw.split('/')[1] ? durRaw.split('/')[1].trim() : `${durNum} Days`;
+
+            document.getElementById('v-dur-en').innerText = `${durEn} (${admG} TO ${disG})`;
+            document.getElementById('v-dur-ar').innerText = `${durNum} (${gregorianToHijri(admD)} إلى ${gregorianToHijri(disD)})`;
+
+            const fields = ['patientName', 'nationalId', 'nationality', 'employer', 'practitionerName', 'position', 'hospitalName'];
+            const ids = ['v-name', 'v-nid', 'v-nat', 'v-emp', 'v-pra', 'v-pos', 'v-hosp'];
+
+            fields.forEach((f, i) => {
+                let v = data[f];
+                if (v === undefined || v === null || v === "") v = (f === 'hospitalName') ? "" : "--";
+                v = String(v);
+
+                let ar = v.split('/')[0].trim(), en = v.split('/')[1] ? v.split('/')[1].trim() : ar;
+
+                if (f === 'hospitalName') {
+                    document.getElementById('v-hosp-ar').innerText = (ar !== "--" && ar !== "") ? ar : "";
+                    document.getElementById('v-hosp-en').innerText = (en !== "--" && en !== "") ? en : "";
+                } else if (document.getElementById(ids[i] + '-ar')) {
+                    document.getElementById(ids[i] + '-ar').innerText = ar;
+                    const enEl = document.getElementById(ids[i] + '-en');
+                    if (enEl) {
+                        enEl.innerText = en;
+                        if (f === 'patientName' || f === 'practitionerName') enEl.style.textTransform = 'uppercase';
+                        if (f === 'position') enEl.style.textTransform = 'lowercase';
+                    }
+                } else {
+                    const el = document.getElementById(ids[i]);
+                    if (el) el.innerText = ar;
+                }
+            });
+
+            const now = new Date(data.createdAt || Date.now());
+            document.getElementById('p-time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('p-date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+            // توليد الباركود الموحد للرابط الثابت
+            new QRCode(document.getElementById('qr-code-img'), {
+                text: "https://seha-ux.github.io/seha-ux/",
+                width: 110,
+                height: 110,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        if (leaveId) {
+            fetch(`${SCRIPT_URL}?leaveId=${encodeURIComponent(leaveId)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.leaveId) {
+                        document.getElementById('loading-overlay').style.display = 'none';
+                        processData(data);
+                    }
+                });
+        }
+
+        async function imgToBase64(url, clean = false) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                if (url.startsWith('http')) img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    try {
+                        const c = document.createElement('canvas');
+                        c.width = img.width; c.height = img.height;
+                        const ctx = c.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        if (clean) {
+                            try {
+                                const id = ctx.getImageData(0, 0, c.width, c.height), d = id.data;
+                                for (let i = 0; i < d.length; i += 4) if (d[i] > 235 && d[i + 1] > 235 && d[i + 2] > 235) d[i + 3] = 0;
+                                ctx.putImageData(id, 0, 0);
+                            } catch (e) { console.warn('Pixel cleaning blocked by security, skipping cleaning for this image.'); }
+                        }
+                        resolve(c.toDataURL('image/png'));
+                    } catch (e) { resolve(url); }
+                };
+                img.onerror = () => resolve(url);
+                img.src = url;
+            });
+        }
+
+        async function downloadPDF() {
+            const overlay = document.getElementById('loading-overlay');
+            const reportEl = document.getElementById('report-content');
+            overlay.style.display = 'flex';
+            document.getElementById('loading-msg').innerText = 'جاري معالجة التقرير بدقة فائقة (UHD)...';
+
+            try {
+                // تحسين جودة النصوص قبل الالتقاط
+                reportEl.style.textRendering = 'geometricPrecision';
+                reportEl.style.webkitFontSmoothing = 'antialiased';
+
+                const imgs = document.querySelectorAll('img');
+                for (const img of imgs) {
+                    try {
+                        img.src = await imgToBase64(img.src, true);
+                    } catch (e) { console.warn('Image processing failed'); }
+                }
+
+                const canvas = await html2canvas(reportEl, {
+                    scale: 4.0, // دقة فائقة جداً
+                    useCORS: true,
+                    logging: false,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 1.0); // أعلى جودة ممكنة
+                const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+                const w = pdf.internal.pageSize.getWidth();
+                const h = (canvas.height * w) / canvas.width;
+
+                pdf.addImage(imgData, 'JPEG', 0, 0, w, h, undefined, 'SLOW');
+                pdf.save(`Medical_Report_${leaveId || 'Seha'}.pdf`);
+            } catch (err) {
+                console.error('High-Res PDF Error:', err);
+                window.print();
+            } finally {
+                overlay.style.display = 'none';
+                reportEl.style.textRendering = '';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "صحة - استعلام الإجازات",
+  "short_name": "استعلام صحة",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#306db5",
+  "theme_color": "#306db5",
+  "icons": [
+    {
+      "src": "logo_header.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo_header.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صحة - منصة الخدمات الصحية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest_admin.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+    </script>
+    <style>
+        /* شاشة القفل */
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--navy);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            text-align: center;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            color: #333;
+        }
+
+        .auth-card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .auth-error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .admin-wrapper {
+            max-width: 1000px;
+            margin: 2rem auto;
+            box-shadow: var(--shadow);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            display: none;
+        }
+
+        .admin-container {
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .input-ar {
+            text-align: right;
+            direction: rtl;
+        }
+
+        .input-en {
+            text-align: left;
+            direction: ltr;
+        }
+
+        .section-title {
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .label-pair {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- شاشة الحماية -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <img src="logo_header.png" alt="Logo" style="width: 80px; margin-bottom: 10px;">
+            <h2>رمز التحقق</h2>
+            <input type="password" id="pass-input" class="auth-input" placeholder="******" maxlength="6">
+            <button class="auth-btn" onclick="checkAuth()">تأكيد</button>
+            <p id="auth-err" class="auth-error">الرمز غير صحيح!</p>
+        </div>
+    </div>
+
+    <div class="admin-wrapper" id="admin-main">
+        <div style="text-align: center; background: white; border-bottom: 1px solid #eee;">
+            <img src="admin_header.png" alt="Header" style="width: 100%; height: auto; display: block;">
+        </div>
+
+        <main>
+            <div class="admin-container">
+                <form id="data-entry-form">
+                    <h3 class="section-title">
+                        <span>بيانات الإجازة</span>
+                        <span>Leave Details</span>
+                    </h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="label-pair"><span>رمز الإجازة</span><span>Leave ID</span></label>
+                            <input type="text" id="leaveId" class="form-control" required placeholder="SL-12345">
+                        </div>
+                        <div class="form-group">
+                            <label class="label-pair"><span>مدة الإجازة</span><span>Duration</span></label>
+                            <input type="text" id="duration" class="form-control" required
+                                placeholder="3 أيام / 3 Days">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
+                        <div class="form-group">
+                            <label>تاريخ الدخول (Admission)</label>
+                            <input type="date" id="admissionDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>تاريخ الخروج (Discharge)</label>
+                            <input type="date" id="dischargeDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>تاريخ الإصدار (Issue)</label>
+                            <input type="date" id="issueDate" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">
+                        <span>بيانات المريض والممارس</span>
+                        <span>Patient & Practitioner Details</span>
+                    </h3>
+
+                    <!-- الاسم -->
+                    <div class="label-pair"><span>الاسم بالعربي</span><span>Name in English (Auto)</span></div>
+                    <div class="form-row">
+                        <input type="text" id="patientName_ar" class="form-control input-ar"
+                            placeholder="اكتب الاسم هنا..." required
+                            oninput="triggerAutoTranslate('patientName_ar', 'patientName_en')">
+                        <input type="text" id="patientName_en" class="form-control input-en"
+                            placeholder="English Name...">
+                    </div>
+
+                    <!-- رقم الهوية -->
+                    <div class="label-pair"><span>رقم الهوية / الإقامة</span><span>National ID / Iqama</span></div>
+                    <div class="form-row">
+                        <input type="text" id="nationalId" class="form-control input-ar"
+                            placeholder="أدخل رقم الهوية أو الإقامة..." required style="grid-column: span 2;">
+                    </div>
+
+                    <!-- الجنسية -->
+                    <div class="label-pair"><span>الجنسية</span><span>Nationality (Auto)</span></div>
+                    <div class="form-row">
+                        <input type="text" id="nationality_ar" class="form-control input-ar" placeholder="الجنسية..."
+                            required oninput="triggerAutoTranslate('nationality_ar', 'nationality_en')">
+                        <input type="text" id="nationality_en" class="form-control input-en"
+                            placeholder="Nationality...">
+                    </div>
+
+                    <!-- جهة العمل -->
+                    <div class="label-pair"><span>جهة العمل</span><span>Employer (Auto)</span></div>
+                    <div class="form-row">
+                        <input type="text" id="employer_ar" class="form-control input-ar" placeholder="جهة العمل..."
+                            required oninput="triggerAutoTranslate('employer_ar', 'employer_en')">
+                        <input type="text" id="employer_en" class="form-control input-en" placeholder="Employer...">
+                    </div>
+
+                    <!-- اسم الممارس -->
+                    <div class="label-pair"><span>اسم الممارس</span><span>Practitioner Name (Auto)</span></div>
+                    <div class="form-row">
+                        <input type="text" id="practitionerName_ar" class="form-control input-ar"
+                            placeholder="اسم الممارس..." required
+                            oninput="triggerAutoTranslate('practitionerName_ar', 'practitionerName_en')">
+                        <input type="text" id="practitionerName_en" class="form-control input-en"
+                            placeholder="Practitioner Name...">
+                    </div>
+
+                    <!-- المسمى الوظيفي -->
+                    <div class="label-pair"><span>المسمى الوظيفي</span><span>Position (Auto)</span></div>
+                    <div class="form-row">
+                        <input type="text" id="position_ar" class="form-control input-ar"
+                            placeholder="المسمى الوظيفي..." required
+                            oninput="triggerAutoTranslate('position_ar', 'position_en')">
+                        <input type="text" id="position_en" class="form-control input-en" placeholder="Position...">
+                    </div>
+
+                    <!-- اسم المستشفى -->
+                    <div class="label-pair"><span>اسم المنشأة الصحية</span><span>Hospital / Facility Name (Auto)</span>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" id="hospitalName_ar" class="form-control input-ar"
+                            placeholder="اسم المستشفى..." required
+                            oninput="triggerAutoTranslate('hospitalName_ar', 'hospitalName_en')">
+                        <input type="text" id="hospitalName_en" class="form-control input-en"
+                            placeholder="Hospital Name...">
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submit-btn">حفظ وإصدار التقرير</button>
+                    <div id="status-msg" style="margin-top: 1rem; text-align: center;"></div>
+                </form>
+
+                <div style="margin-top: 2rem; display: flex; justify-content: flex-start;">
+                    <img src="admin_footer_logos.png" alt="Footer Logos"
+                        style="max-width: 300px; width: 100%; height: auto;">
+                </div>
+
+                <!-- قسم سجل التقارير -->
+                <div style="margin-top: 3rem; border-top: 2px solid #eee; padding-top: 2rem;">
+                    <h3 class="section-title">
+                        <span>سجل التقارير الصادرة</span>
+                        <span>Issued Reports History</span>
+                    </h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 14px;">
+                            <thead>
+                                <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                    <th style="padding: 12px; text-align: right;">رمز الإجازة</th>
+                                    <th style="padding: 12px; text-align: right;">اسم المريض</th>
+                                    <th style="padding: 12px; text-align: right;">التاريخ</th>
+                                    <th style="padding: 12px; text-align: center;">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-body">
+                                <tr>
+                                    <td colspan="4" style="padding: 20px; text-align: center; color: #888;">جاري تحميل
+                                        السجل...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKhcyjYfvibFJJXzy0hxT6CnmmL5gbBZYI5gBnTrmvy_6gvNNUjnlK-qXTzWsyGly9SA/exec';
+
+        // الحماية بكلمة مرور
+        function checkAuth() {
+            const input = document.getElementById('pass-input').value;
+            const error = document.getElementById('auth-err');
+            if (input === "202025") {
+                sessionStorage.setItem('isAdmin', 'true');
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('admin-main').style.display = 'block';
+            } else {
+                error.style.display = 'block';
+            }
+        }
+
+        // فحص الجلسة عند التحميل
+        window.onload = function () {
+            if (sessionStorage.getItem('isAdmin') === 'true') {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('admin-main').style.display = 'block';
+                loadHistory(); // تحميل السجل عند الدخول
+            }
+        };
+
+        let existingRecords = []; // مخزن عالمي للسجلات لمنع التكرار
+
+        // دالة تحميل سجل التقارير
+        async function loadHistory() {
+            const historyBody = document.getElementById('history-body');
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=list`);
+                const data = await res.json();
+
+                if (data && data.length > 0) {
+                    existingRecords = data; // تخزين البيانات للفحص اللاحق
+                    historyBody.innerHTML = data.map(item => `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px; font-weight: bold;">${item.leaveId}</td>
+                            <td style="padding: 10px;">${item.patientName}</td>
+                            <td style="padding: 10px; color: #666;">${new Date(item.createdAt).toLocaleDateString('ar-SA')}</td>
+                            <td style="padding: 10px; text-align: center;">
+                                <a href="report.html?id=${item.leaveId}" target="_blank" 
+                                   style="color: var(--primary-color); text-decoration: none; font-weight: bold; border: 1px solid var(--primary-color); padding: 4px 12px; border-radius: 4px;">
+                                   عرض ومشاركة
+                                </a>
+                            </td>
+                        </tr>
+                    `).reverse().join(''); // إظهار الأحدث أولاً
+                } else {
+                    historyBody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">لا توجد تقارير مسجلة بعد.</td></tr>';
+                }
+            } catch (error) {
+                historyBody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: red;">فشل تحميل السجل. تأكد من تحديث الـ Script.</td></tr>';
+            }
+        }
+
+        // دالة الترجمة التلقائية الذكية مع مؤقت (Debounce)
+        let translationTimers = {};
+
+        function triggerAutoTranslate(sourceId, targetId) {
+            clearTimeout(translationTimers[sourceId]);
+            translationTimers[sourceId] = setTimeout(() => {
+                autoTranslate(sourceId, targetId);
+            }, 1000); // الانتظار لثانية واحدة بعد التوقف عن الكتابة
+        }
+
+        async function autoTranslate(sourceId, targetId) {
+            const sourceText = document.getElementById(sourceId).value;
+            const targetInput = document.getElementById(targetId);
+
+            if (!sourceText) return;
+
+            try {
+                targetInput.placeholder = "Translating...";
+                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=ar|en`);
+                const data = await res.json();
+                if (data.responseData.translatedText) {
+                    targetInput.value = data.responseData.translatedText;
+                }
+            } catch (error) {
+                console.log("Translation error", error);
+            } finally {
+                targetInput.placeholder = "English Name...";
+            }
+        }
+
+        const form = document.getElementById('data-entry-form');
+        const statusMsg = document.getElementById('status-msg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const leaveIdVal = document.getElementById('leaveId').value.trim();
+            const nationalIdVal = document.getElementById('nationalId').value.trim();
+
+            statusMsg.innerHTML = '';
+
+            // 1. ميزة منع التكرار
+            const duplicateLeave = existingRecords.find(r => r.leaveId.toLowerCase() === leaveIdVal.toLowerCase());
+            if (duplicateLeave) {
+                statusMsg.innerHTML = `<p class="alert" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:10px; border-radius:5px;">⚠️ خطأ: رمز الإجازة (${leaveIdVal}) مسجل مسبقاً لمريض آخر!</p>`;
+                window.scrollTo({ top: statusMsg.offsetTop - 100, behavior: 'smooth' });
+                return;
+            }
+
+            const duplicateNid = existingRecords.find(r => String(r.nationalId) === String(nationalIdVal));
+            if (duplicateNid) {
+                statusMsg.innerHTML = `<p class="alert" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:10px; border-radius:5px;">⚠️ خطأ: رقم الهوية (${nationalIdVal}) له تقرير مسجل مسبقاً في السجل!</p>`;
+                window.scrollTo({ top: statusMsg.offsetTop - 100, behavior: 'smooth' });
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'جاري الحفظ في السحابة...';
+
+            // دمج اللغتين في قيمة واحدة ليتم تخزينها في جوجل شيت وعرضها في التقرير
+            const formData = {
+                leaveId: leaveIdVal,
+                duration: document.getElementById('duration').value,
+                admissionDate: document.getElementById('admissionDate').value,
+                dischargeDate: document.getElementById('dischargeDate').value,
+                issueDate: document.getElementById('issueDate').value,
+                patientName: document.getElementById('patientName_ar').value + " / " + document.getElementById('patientName_en').value,
+                nationalId: nationalIdVal + " ", // إضافة مسافة لإجبار جوجل شيت على حفظه كنص وحماية الأصفار
+                nationality: document.getElementById('nationality_ar').value + " / " + document.getElementById('nationality_en').value,
+                employer: document.getElementById('employer_ar').value + " / " + document.getElementById('employer_en').value,
+                practitionerName: document.getElementById('practitionerName_ar').value + " / " + document.getElementById('practitionerName_en').value,
+                position: document.getElementById('position_ar').value + " / " + document.getElementById('position_en').value,
+                hospitalName: document.getElementById('hospitalName_ar').value + " / " + document.getElementById('hospitalName_en').value,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                statusMsg.innerHTML = `
+                    <div style="background-color: #e6f7ed; color: #155724; border: 1px solid #c3e6cb; padding: 25px; border-radius: 10px; margin-top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <h4 style="margin-top: 0;">✅ تم حفظ البيانات بنجاح!</h4>
+                        <p style="margin-bottom: 15px;">الآن يمكنك عرض التقرير الرسمي ومشاركته كملف PDF.</p>
+                        <a href="report.html?id=${formData.leaveId}" target="_blank" 
+                           style="display: inline-block; background: var(--primary-color); color: white; text-decoration: none; padding: 12px 30px; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                            فتح التقرير للطباعة والمشاركة
+                        </a>
+                    </div>
+                `;
+                form.reset();
+                await loadHistory(); // تحديث السجل فوراً بعد الحفظ لضمان منع التكرار في العملية القادمة
+            } catch (error) {
+                statusMsg.innerHTML = '<p class="alert">حدث خطأ أثناء الحفظ.</p>';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'حفظ وإصدار التقرير';
+            }
+        });
+    </script>
+</body>
+
+</html>
