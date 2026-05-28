@@ -4,464 +4,488 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>صحة - منصة الخدمات الصحية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#1e3a8a">
+    <link rel="manifest" href="manifest.json">
+    <title>مؤسسة ليان لأجل الإنسان | المنصة الاعلامية </title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo for Arabic, Inter for English -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest_admin.json">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                for (let registration of registrations) {
-                    registration.unregister();
-                }
-            });
-        }
-    </script>
+
     <style>
-        /* شاشة القفل */
-        #auth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--navy);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            color: white;
-            text-align: center;
+        body {
             font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
         }
 
-        .auth-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            color: #333;
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .auth-card h2 {
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            font-weight: 800;
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
         }
 
-        .auth-input {
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #2563eb;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 1rem;
-            border: 2px solid #eee;
-            border-radius: 8px;
-            font-size: 20px;
-            text-align: center;
-            letter-spacing: 5px;
         }
 
-        .auth-btn {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .auth-error {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .admin-wrapper {
-            max-width: 1000px;
-            margin: 2rem auto;
-            box-shadow: var(--shadow);
-            border-radius: 12px;
-            overflow: hidden;
-            background: white;
-            display: none;
-        }
-
-        .admin-container {
-            width: 100%;
-            padding: 2rem;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .form-group {
-            margin-bottom: 0;
-        }
-
-        .input-ar {
-            text-align: right;
-            direction: rtl;
-        }
-
-        .input-en {
-            text-align: left;
-            direction: ltr;
-        }
-
-        .section-title {
-            margin-top: 1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            font-weight: 800;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .label-pair {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 5px;
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
         }
     </style>
 </head>
 
-<body>
-    <!-- شاشة الحماية -->
-    <div id="auth-overlay">
-        <div class="auth-card">
-            <img src="logo_header.png" alt="Logo" style="width: 80px; margin-bottom: 10px;">
-            <h2>رمز التحقق</h2>
-            <input type="password" id="pass-input" class="auth-input" placeholder="******" maxlength="6">
-            <button class="auth-btn" onclick="checkAuth()">تأكيد</button>
-            <p id="auth-err" class="auth-error">الرمز غير صحيح!</p>
+<body class="text-slate-800">
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-50 transition-all duration-300 glass shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="Layan Logo"
+                    class="w-14 h-14 object-contain animate__animated animate__bounceIn">
+                <div>
+                    <h1 class="text-xl font-bold text-blue-900 leading-none">مؤسسة ليان</h1>
+                    <span class="text-xs text-blue-600 font-semibold uppercase tracking-wider"> لأجل الإنسان</span>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex gap-8 items-center">
+                <a href="#home" class="nav-link font-semibold text-blue-900">الرئيسية</a>
+                <a href="#about" class="nav-link font-semibold text-slate-600 hover:text-blue-600">من نحن</a>
+                <a href="#projects" class="nav-link font-semibold text-slate-600 hover:text-blue-600">مشاريعنا</a>
+                <a href="#news" class="nav-link font-semibold text-slate-600 hover:text-blue-600">الأخبار</a>
+                <a href="#media" class="nav-link font-semibold text-slate-600 hover:text-blue-600">المركز الإعلامي</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <button id="mobile-menu-btn" class="md:hidden text-2xl text-blue-900"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Drawer -->
+    <div id="mobile-menu" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden transition-all duration-300">
+        <div class="w-64 bg-white h-full p-6 shadow-2xl flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-8">
+                    <div class="flex items-center gap-3">
+                        <img src="logo.png" alt="Layan Logo" class="w-10 h-10 object-contain">
+                        <span class="font-bold text-blue-900 text-lg">مؤسسة ليان</span>
+                    </div>
+                    <button id="close-menu-btn" class="text-2xl text-slate-500 hover:text-red-500 transition-all"><i class="fas fa-times"></i></button>
+                </div>
+                <nav class="flex flex-col gap-4">
+                    <a href="#home" class="mobile-nav-link font-semibold text-blue-900 py-2 border-b border-slate-50">الرئيسية</a>
+                    <a href="#about" class="mobile-nav-link font-semibold text-slate-600 hover:text-blue-600 py-2 border-b border-slate-50">من نحن</a>
+                    <a href="#projects" class="mobile-nav-link font-semibold text-slate-600 hover:text-blue-600 py-2 border-b border-slate-50">مشاريعنا</a>
+                    <a href="#news" class="mobile-nav-link font-semibold text-slate-600 hover:text-blue-600 py-2 border-b border-slate-50">الأخبار</a>
+                    <a href="#media" class="mobile-nav-link font-semibold text-slate-600 hover:text-blue-600 py-2 border-b border-slate-50">المركز الإعلامي</a>
+                </nav>
+            </div>
         </div>
     </div>
 
-    <div class="admin-wrapper" id="admin-main">
-        <div style="text-align: center; background: white; border-bottom: 1px solid #eee;">
-            <img src="admin_header.png" alt="Header" style="width: 100%; height: auto; display: block;">
+    <!-- Hero Section -->
+    <section id="home" class="pt-32 pb-20 hero-gradient relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white"></path>
+            </svg>
         </div>
+        <div class="container mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2 text-white animate__animated animate__fadeInRight">
+                <span
+                    class="inline-block px-4 py-1 rounded-full bg-blue-500 bg-opacity-30 border border-blue-400 text-sm font-semibold mb-6">مؤسسة
+                    إنسانية رائدة</span>
+                <h2 class="text-4xl md:text-6xl font-bold mb-6 leading-tight"> انطلاقةٌ من أجل الإنسان.. <br><span
+                        class="text-blue-300"> من قلب الرقة وإليها </span></h2>
+                <p class="text-lg text-blue-100 mb-8 max-w-lg leading-relaxed"> من نحن؟
+                    مؤسسة تنموية، إغاثية، وإنسانية، ولدت من رحم الاحتياج في مناطقنا (الرقة، الطبقة، والمنصورة)
+                    وتعنا بالصحة والتنمية والإسكان والخدمات الإجتماعية
+                    شعارنا معاً نبني، ومعاً ننمو
+                    رسالتنا بناء انسان وغايتنا أثر واحسان
+                    يدا بيد لبناء غداً افضل برؤية إنسانية
+                    شاركونا هذه البداية فانتم شركاء النجاح والأثر</p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#news"
+                        class="px-8 py-3 bg-white text-blue-700 rounded-xl font-bold shadow-xl hover:bg-blue-50 transition-all flex items-center gap-2">
+                        استكشف مبادراتنا <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <a href="#about"
+                        class="px-8 py-3 bg-transparent border-2 border-white text-white rounded-xl font-bold hover:bg-white hover:text-blue-700 transition-all">
+                        من نحن
+                    </a>
+                </div>
+            </div>
+            <div class="md:w-1/2 animate__animated animate__fadeInLeft">
+                <div class="relative">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-400 rounded-full blur-3xl opacity-30">
+                    </div>
+                    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-400 rounded-full blur-3xl opacity-30">
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        alt="Humanitarian Work"
+                        class="rounded-3xl shadow-2xl relative z-10 border-8 border-white border-opacity-10">
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <main>
-            <div class="admin-container">
-                <form id="data-entry-form">
-                    <h3 class="section-title">
-                        <span>بيانات الإجازة</span>
-                        <span>Leave Details</span>
-                    </h3>
+    <!-- Stats Section -->
+    <section class="-mt-12 container mx-auto px-6 relative z-20">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div
+                class="bg-white p-6 rounded-2xl shadow-xl text-center border-b-4 border-blue-500 transform hover:-translate-y-2 transition-all">
+                <div class="text-3xl font-bold text-blue-700 mb-1" id="stat-projects">0</div>
+                <div class="text-slate-500 font-semibold">مشروع منفذ</div>
+            </div>
+            <div
+                class="bg-white p-6 rounded-2xl shadow-xl text-center border-b-4 border-green-500 transform hover:-translate-y-2 transition-all">
+                <div class="text-3xl font-bold text-green-600 mb-1" id="stat-beneficiaries">0</div>
+                <div class="text-slate-500 font-semibold">مستفيد</div>
+            </div>
+            <div
+                class="bg-white p-6 rounded-2xl shadow-xl text-center border-b-4 border-yellow-500 transform hover:-translate-y-2 transition-all">
+                <div class="text-3xl font-bold text-yellow-600 mb-1" id="stat-initiatives">0</div>
+                <div class="text-slate-500 font-semibold">مبادرة نشطة</div>
+            </div>
+            <div
+                class="bg-white p-6 rounded-2xl shadow-xl text-center border-b-4 border-purple-500 transform hover:-translate-y-2 transition-all">
+                <div class="text-3xl font-bold text-purple-600 mb-1" id="stat-volunteers">0</div>
+                <div class="text-slate-500 font-semibold">متطوع</div>
+            </div>
+        </div>
+    </section>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="label-pair"><span>رمز الإجازة</span><span>Leave ID</span></label>
-                            <input type="text" id="leaveId" class="form-control" required placeholder="SL-12345">
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-blue-600 font-bold text-sm uppercase tracking-wider">تعرّف علينا</span>
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4">من نحن وماذا نقدم</h3>
+                <div class="w-20 h-1.5 bg-blue-600 rounded-full mx-auto"></div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <h4 class="text-2xl font-bold text-blue-900">مؤسسة ليان لأجل الإنسان</h4>
+                    <p class="text-slate-600 leading-relaxed text-lg">
+                        تأسست مؤسسة ليان كاستجابة إنسانية وتنموية نابعة من الاحتياج الحقيقي لأهلنا في الرقة، الطبقة، والمنصورة. نحن نسعى لتقديم يد العون وبناء القدرات المحلية برؤية واضحة ومستدامة.
+                    </p>
+                    <div class="grid sm:grid-cols-2 gap-6 mt-8">
+                        <div class="p-5 bg-blue-50/50 rounded-2xl border border-blue-100/50 flex gap-4">
+                            <div class="text-blue-600 text-2xl mt-1"><i class="fas fa-eye"></i></div>
+                            <div>
+                                <h5 class="font-bold text-slate-900 mb-1">رؤيتنا</h5>
+                                <p class="text-slate-500 text-sm">مجتمع مُمكّن، واعٍ، ومزدهر يتمتع بحقوقه الكاملة والخدمات الأساسية.</p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="label-pair"><span>مدة الإجازة</span><span>Duration</span></label>
-                            <input type="text" id="duration" class="form-control" required
-                                placeholder="3 أيام / 3 Days">
+                        <div class="p-5 bg-green-50/50 rounded-2xl border border-green-100/50 flex gap-4">
+                            <div class="text-green-600 text-2xl mt-1"><i class="fas fa-bullseye"></i></div>
+                            <div>
+                                <h5 class="font-bold text-slate-900 mb-1">رسالتنا</h5>
+                                <p class="text-slate-500 text-sm">بناء الإنسان عبر برامج التعليم الرعاية الدعم المهني المبتكر.</p>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
-                        <div class="form-group">
-                            <label>تاريخ الدخول (Admission)</label>
-                            <input type="date" id="admissionDate" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>تاريخ الخروج (Discharge)</label>
-                            <input type="date" id="dischargeDate" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>تاريخ الإصدار (Issue)</label>
-                            <input type="date" id="issueDate" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <h3 class="section-title">
-                        <span>بيانات المريض والممارس</span>
-                        <span>Patient & Practitioner Details</span>
-                    </h3>
-
-                    <!-- الاسم -->
-                    <div class="label-pair"><span>الاسم بالعربي</span><span>Name in English (Auto)</span></div>
-                    <div class="form-row">
-                        <input type="text" id="patientName_ar" class="form-control input-ar"
-                            placeholder="اكتب الاسم هنا..." required
-                            oninput="triggerAutoTranslate('patientName_ar', 'patientName_en')">
-                        <input type="text" id="patientName_en" class="form-control input-en"
-                            placeholder="English Name...">
-                    </div>
-
-                    <!-- رقم الهوية -->
-                    <div class="label-pair"><span>رقم الهوية / الإقامة</span><span>National ID / Iqama</span></div>
-                    <div class="form-row">
-                        <input type="text" id="nationalId" class="form-control input-ar"
-                            placeholder="أدخل رقم الهوية أو الإقامة..." required style="grid-column: span 2;">
-                    </div>
-
-                    <!-- الجنسية -->
-                    <div class="label-pair"><span>الجنسية</span><span>Nationality (Auto)</span></div>
-                    <div class="form-row">
-                        <input type="text" id="nationality_ar" class="form-control input-ar" placeholder="الجنسية..."
-                            required oninput="triggerAutoTranslate('nationality_ar', 'nationality_en')">
-                        <input type="text" id="nationality_en" class="form-control input-en"
-                            placeholder="Nationality...">
-                    </div>
-
-                    <!-- جهة العمل -->
-                    <div class="label-pair"><span>جهة العمل</span><span>Employer (Auto)</span></div>
-                    <div class="form-row">
-                        <input type="text" id="employer_ar" class="form-control input-ar" placeholder="جهة العمل..."
-                            required oninput="triggerAutoTranslate('employer_ar', 'employer_en')">
-                        <input type="text" id="employer_en" class="form-control input-en" placeholder="Employer...">
-                    </div>
-
-                    <!-- اسم الممارس -->
-                    <div class="label-pair"><span>اسم الممارس</span><span>Practitioner Name (Auto)</span></div>
-                    <div class="form-row">
-                        <input type="text" id="practitionerName_ar" class="form-control input-ar"
-                            placeholder="اسم الممارس..." required
-                            oninput="triggerAutoTranslate('practitionerName_ar', 'practitionerName_en')">
-                        <input type="text" id="practitionerName_en" class="form-control input-en"
-                            placeholder="Practitioner Name...">
-                    </div>
-
-                    <!-- المسمى الوظيفي -->
-                    <div class="label-pair"><span>المسمى الوظيفي</span><span>Position (Auto)</span></div>
-                    <div class="form-row">
-                        <input type="text" id="position_ar" class="form-control input-ar"
-                            placeholder="المسمى الوظيفي..." required
-                            oninput="triggerAutoTranslate('position_ar', 'position_en')">
-                        <input type="text" id="position_en" class="form-control input-en" placeholder="Position...">
-                    </div>
-
-                    <!-- اسم المستشفى -->
-                    <div class="label-pair"><span>اسم المنشأة الصحية</span><span>Hospital / Facility Name (Auto)</span>
-                    </div>
-                    <div class="form-row">
-                        <input type="text" id="hospitalName_ar" class="form-control input-ar"
-                            placeholder="اسم المستشفى..." required
-                            oninput="triggerAutoTranslate('hospitalName_ar', 'hospitalName_en')">
-                        <input type="text" id="hospitalName_en" class="form-control input-en"
-                            placeholder="Hospital Name...">
-                    </div>
-
-                    <button type="submit" class="btn-submit" id="submit-btn">حفظ وإصدار التقرير</button>
-                    <div id="status-msg" style="margin-top: 1rem; text-align: center;"></div>
-                </form>
-
-                <div style="margin-top: 2rem; display: flex; justify-content: flex-start;">
-                    <img src="admin_footer_logos.png" alt="Footer Logos"
-                        style="max-width: 300px; width: 100%; height: auto;">
                 </div>
 
-                <!-- قسم سجل التقارير -->
-                <div style="margin-top: 3rem; border-top: 2px solid #eee; padding-top: 2rem;">
-                    <h3 class="section-title">
-                        <span>سجل التقارير الصادرة</span>
-                        <span>Issued Reports History</span>
-                    </h3>
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 14px;">
-                            <thead>
-                                <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-                                    <th style="padding: 12px; text-align: right;">رمز الإجازة</th>
-                                    <th style="padding: 12px; text-align: right;">اسم المريض</th>
-                                    <th style="padding: 12px; text-align: right;">التاريخ</th>
-                                    <th style="padding: 12px; text-align: center;">إجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="history-body">
-                                <tr>
-                                    <td colspan="4" style="padding: 20px; text-align: center; color: #888;">جاري تحميل
-                                        السجل...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl mb-6 shadow-sm">
+                            <i class="fas fa-hand-holding-medical"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-900 mb-2">الرعاية الصحية</h5>
+                            <p class="text-slate-500 text-sm">تقديم الخدمات الوقائية والعلاجية وتأمين الاحتياجات الدوائية للأسر الأشد فقراً.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl mb-6 shadow-sm">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-900 mb-2">التدريب المهني</h5>
+                            <p class="text-slate-500 text-sm">تمكين النساء والشباب مهنياً لمساعدتهم في تأمين فرص عمل مستدامة.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl mb-6 shadow-sm">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-900 mb-2">إعادة الإعمار</h5>
+                            <p class="text-slate-500 text-sm">إعادة ترميم وتأهيل مساكن الأسر الفقيرة لضمان عيش كريم وآمن.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col justify-between">
+                        <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center text-xl mb-6 shadow-sm">
+                            <i class="fas fa-heart text-amber-500"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-900 mb-2">الدعم النفسي</h5>
+                            <p class="text-slate-500 text-sm">جلسات رعاية ودعم نفسي للأطفال والنساء للتغلب على آثار الحرب والنزوح.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </main>
+
+            <!-- Our Strategic Goals -->
+            <div class="mt-20 border-t border-slate-100 pt-16">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <span class="text-blue-600 font-bold text-sm uppercase tracking-wider">أهدافنا الاستراتيجية</span>
+                    <h4 class="text-3xl font-bold text-slate-900 mt-2 mb-4">نسعى لتحقيق أثر مستدام عبر:</h4>
+                    <div class="w-20 h-1.5 bg-blue-600 rounded-full mx-auto"></div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Poster 1 -->
+                    <div class="relative overflow-hidden group bg-gradient-to-br from-blue-600 to-indigo-800 rounded-3xl p-8 text-white shadow-lg hover:shadow-blue-500/30 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between min-h-[250px]">
+                        <div class="absolute -right-4 -bottom-4 text-9xl font-black text-white/5 select-none transition-all group-hover:scale-110 duration-500">01</div>
+                        <div>
+                            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner border border-white/20">
+                                <i class="fas fa-tools text-blue-200"></i>
+                            </div>
+                            <h5 class="text-xl font-bold mb-3 tracking-wide text-white group-hover:text-blue-100 transition-colors">تأهيل البنى التحتية</h5>
+                            <p class="text-blue-100/90 text-sm leading-relaxed font-light">المساهمة الفعّالة في ترميم وتحسين مساكن الأسر الأشد احتياجاً وتطوير البنى التحتية كركيزة أساسية لإعادة إعمار سورية.</p>
+                        </div>
+                    </div>
+
+                    <!-- Poster 2 -->
+                    <div class="relative overflow-hidden group bg-gradient-to-br from-emerald-600 to-teal-800 rounded-3xl p-8 text-white shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between min-h-[250px]">
+                        <div class="absolute -right-4 -bottom-4 text-9xl font-black text-white/5 select-none transition-all group-hover:scale-110 duration-500">02</div>
+                        <div>
+                            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner border border-white/20">
+                                <i class="fas fa-chart-line text-emerald-200"></i>
+                            </div>
+                            <h5 class="text-xl font-bold mb-3 tracking-wide text-white group-hover:text-emerald-100 transition-colors">تنمية الاقتصاد المحلي</h5>
+                            <p class="text-emerald-100/90 text-sm leading-relaxed font-light">استثمار طاقات رأس المال البشري وتأهيل القدرات المحلية للمساهمة الحقيقية في دفع عجلة التنمية المستدامة.</p>
+                        </div>
+                    </div>
+
+                    <!-- Poster 3 -->
+                    <div class="relative overflow-hidden group bg-gradient-to-br from-amber-500 to-orange-700 rounded-3xl p-8 text-white shadow-lg hover:shadow-amber-500/30 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between min-h-[250px]">
+                        <div class="absolute -right-4 -bottom-4 text-9xl font-black text-white/5 select-none transition-all group-hover:scale-110 duration-500">03</div>
+                        <div>
+                            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner border border-white/20">
+                                <i class="fas fa-hand-holding-heart text-amber-200"></i>
+                            </div>
+                            <h5 class="text-xl font-bold mb-3 tracking-wide text-white group-hover:text-amber-100 transition-colors">الاستجابة الإغاثية المتكاملة</h5>
+                            <p class="text-amber-100/90 text-sm leading-relaxed font-light">تقديم خدمات إغاثية مجتمعية شاملة ومرنة تلبي الاحتياجات الأساسية لمختلف فئات المجتمع وصون كرامتهم.</p>
+                        </div>
+                    </div>
+
+                    <!-- Poster 4 -->
+                    <div class="relative overflow-hidden group bg-gradient-to-br from-rose-500 to-red-700 rounded-3xl p-8 text-white shadow-lg hover:shadow-rose-500/30 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between min-h-[250px]">
+                        <div class="absolute -right-4 -bottom-4 text-9xl font-black text-white/5 select-none transition-all group-hover:scale-110 duration-500">04</div>
+                        <div>
+                            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner border border-white/20">
+                                <i class="fas fa-heartbeat text-rose-200"></i>
+                            </div>
+                            <h5 class="text-xl font-bold mb-3 tracking-wide text-white group-hover:text-rose-100 transition-colors">الرعاية الصحية المتكاملة</h5>
+                            <p class="text-rose-100/90 text-sm leading-relaxed font-light">توفير خدمات علاجية ووقائية متميزة للأسر الأكثر احتياجاً لتأمين رعاية صحية تصون الأبدان وتحمي الأرواح.</p>
+                        </div>
+                    </div>
+
+                    <!-- Poster 5 -->
+                    <div class="relative overflow-hidden group bg-gradient-to-br from-purple-600 to-indigo-800 rounded-3xl p-8 text-white shadow-lg hover:shadow-purple-500/30 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between min-h-[250px]">
+                        <div class="absolute -right-4 -bottom-4 text-9xl font-black text-white/5 select-none transition-all group-hover:scale-110 duration-500">05</div>
+                        <div>
+                            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner border border-white/20">
+                                <i class="fas fa-user-graduate text-purple-200"></i>
+                            </div>
+                            <h5 class="text-xl font-bold mb-3 tracking-wide text-white group-hover:text-purple-100 transition-colors">تمكين الشباب والنساء</h5>
+                            <p class="text-purple-100/90 text-sm leading-relaxed font-light">دعم برامج التدريب المهني والإرشاد الوظيفي لبناء كفاءات إنتاجية مستقلة وقادرة على الريادة والابتكار.</p>
+                        </div>
+                    </div>
+
+                    <!-- Poster 6 -->
+                    <div class="relative overflow-hidden group bg-gradient-to-br from-cyan-500 to-teal-700 rounded-3xl p-8 text-white shadow-lg hover:shadow-cyan-500/30 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between min-h-[250px]">
+                        <div class="absolute -right-4 -bottom-4 text-9xl font-black text-white/5 select-none transition-all group-hover:scale-110 duration-500">06</div>
+                        <div>
+                            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner border border-white/20">
+                                <i class="fas fa-users text-cyan-200"></i>
+                            </div>
+                            <h5 class="text-xl font-bold mb-3 tracking-wide text-white group-hover:text-cyan-100 transition-colors">الرعاية والتنمية الاجتماعية</h5>
+                            <p class="text-cyan-100/90 text-sm leading-relaxed font-light">تأسيس مراكز رعاية اجتماعية متطورة لتقديم الدعم النفسي وإطلاق مبادرات تنموية شبابية ومجتمعية فاعلة.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 bg-slate-50 border-t border-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <span class="text-blue-600 font-bold text-sm uppercase tracking-wider">مشاريعنا الميدانية</span>
+                    <h3 class="text-3xl font-bold text-slate-900 mt-2 mb-4">مسيرة البناء والأثر</h3>
+                    <div class="w-20 h-1.5 bg-blue-600 rounded-full"></div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="projects-container">
+                <!-- Dynamic Projects from Sheet -->
+                <div class="col-span-full text-center py-12 text-slate-400 italic">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-4 block"></i>
+                    جاري تحميل المشاريع...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section id="news" class="py-20 bg-white border-t border-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h3 class="text-3xl font-bold text-slate-900 mb-4">آخر الأخبار والفعاليات</h3>
+                    <div class="w-20 h-1.5 bg-blue-600 rounded-full"></div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8" id="news-container">
+                <!-- جاري تحميل الأخبار من القاعدة... -->
+                <div class="col-span-full text-center py-12 text-slate-400 italic">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-4 block"></i>
+                    جاري تحميل الأخبار...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Media Section -->
+    <section id="media" class="py-20 bg-slate-50 border-t border-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-blue-600 font-bold text-sm uppercase tracking-wider">المركز الإعلامي</span>
+                <h3 class="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4">معرض الصور والوسائط</h3>
+                <div class="w-20 h-1.5 bg-blue-600 rounded-full mx-auto"></div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="media-container">
+                <!-- Dynamic Media from Sheet -->
+                <div class="col-span-full text-center py-12 text-slate-400 italic">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-4 block"></i>
+                    جاري تحميل معرض الصور...
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- PWA Install Prompt -->
+    <div id="pwa-install-prompt" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 p-5 z-[100] transform translate-y-[150%] transition-transform duration-500 flex items-center gap-4 hidden">
+        <img src="logo.png" alt="Layan App" class="w-14 h-14 object-contain bg-slate-50 rounded-xl p-1 shadow-sm border border-slate-100">
+        <div class="flex-1">
+            <h4 class="font-bold text-slate-900 text-sm">تطبيق مؤسسة ليان</h4>
+            <p class="text-xs text-slate-500 mt-1">ثبّت التطبيق للوصول السريع للأخبار والمشاريع بدون متصفح</p>
+        </div>
+        <div class="flex flex-col gap-2">
+            <button id="pwa-install-btn" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors shadow-md shadow-blue-500/20">تثبيت الآن</button>
+            <button id="pwa-close-btn" class="text-slate-400 hover:text-slate-600 text-xs font-semibold transition-colors">لاحقاً</button>
+        </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKhcyjYfvibFJJXzy0hxT6CnmmL5gbBZYI5gBnTrmvy_6gvNNUjnlK-qXTzWsyGly9SA/exec';
-
-        // الحماية بكلمة مرور
-        function checkAuth() {
-            const input = document.getElementById('pass-input').value;
-            const error = document.getElementById('auth-err');
-            if (input === "202025") {
-                sessionStorage.setItem('isAdmin', 'true');
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('admin-main').style.display = 'block';
-            } else {
-                error.style.display = 'block';
-            }
-        }
-
-        // فحص الجلسة عند التحميل
-        window.onload = function () {
-            if (sessionStorage.getItem('isAdmin') === 'true') {
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('admin-main').style.display = 'block';
-                loadHistory(); // تحميل السجل عند الدخول
-            }
-        };
-
-        let existingRecords = []; // مخزن عالمي للسجلات لمنع التكرار
-
-        // دالة تحميل سجل التقارير
-        async function loadHistory() {
-            const historyBody = document.getElementById('history-body');
-            try {
-                const res = await fetch(`${SCRIPT_URL}?action=list`);
-                const data = await res.json();
-
-                if (data && data.length > 0) {
-                    existingRecords = data; // تخزين البيانات للفحص اللاحق
-                    historyBody.innerHTML = data.map(item => `
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 10px; font-weight: bold;">${item.leaveId}</td>
-                            <td style="padding: 10px;">${item.patientName}</td>
-                            <td style="padding: 10px; color: #666;">${new Date(item.createdAt).toLocaleDateString('ar-SA')}</td>
-                            <td style="padding: 10px; text-align: center;">
-                                <a href="report.html?id=${item.leaveId}" target="_blank" 
-                                   style="color: var(--primary-color); text-decoration: none; font-weight: bold; border: 1px solid var(--primary-color); padding: 4px 12px; border-radius: 4px;">
-                                   عرض ومشاركة
-                                </a>
-                            </td>
-                        </tr>
-                    `).reverse().join(''); // إظهار الأحدث أولاً
-                } else {
-                    historyBody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">لا توجد تقارير مسجلة بعد.</td></tr>';
-                }
-            } catch (error) {
-                historyBody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: red;">فشل تحميل السجل. تأكد من تحديث الـ Script.</td></tr>';
-            }
-        }
-
-        // دالة الترجمة التلقائية الذكية مع مؤقت (Debounce)
-        let translationTimers = {};
-
-        function triggerAutoTranslate(sourceId, targetId) {
-            clearTimeout(translationTimers[sourceId]);
-            translationTimers[sourceId] = setTimeout(() => {
-                autoTranslate(sourceId, targetId);
-            }, 1000); // الانتظار لثانية واحدة بعد التوقف عن الكتابة
-        }
-
-        async function autoTranslate(sourceId, targetId) {
-            const sourceText = document.getElementById(sourceId).value;
-            const targetInput = document.getElementById(targetId);
-
-            if (!sourceText) return;
-
-            try {
-                targetInput.placeholder = "Translating...";
-                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=ar|en`);
-                const data = await res.json();
-                if (data.responseData.translatedText) {
-                    targetInput.value = data.responseData.translatedText;
-                }
-            } catch (error) {
-                console.log("Translation error", error);
-            } finally {
-                targetInput.placeholder = "English Name...";
-            }
-        }
-
-        const form = document.getElementById('data-entry-form');
-        const statusMsg = document.getElementById('status-msg');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submit-btn');
-            const leaveIdVal = document.getElementById('leaveId').value.trim();
-            const nationalIdVal = document.getElementById('nationalId').value.trim();
-
-            statusMsg.innerHTML = '';
-
-            // 1. ميزة منع التكرار
-            const duplicateLeave = existingRecords.find(r => r.leaveId.toLowerCase() === leaveIdVal.toLowerCase());
-            if (duplicateLeave) {
-                statusMsg.innerHTML = `<p class="alert" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:10px; border-radius:5px;">⚠️ خطأ: رمز الإجازة (${leaveIdVal}) مسجل مسبقاً لمريض آخر!</p>`;
-                window.scrollTo({ top: statusMsg.offsetTop - 100, behavior: 'smooth' });
-                return;
-            }
-
-            const duplicateNid = existingRecords.find(r => String(r.nationalId) === String(nationalIdVal));
-            if (duplicateNid) {
-                statusMsg.innerHTML = `<p class="alert" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:10px; border-radius:5px;">⚠️ خطأ: رقم الهوية (${nationalIdVal}) له تقرير مسجل مسبقاً في السجل!</p>`;
-                window.scrollTo({ top: statusMsg.offsetTop - 100, behavior: 'smooth' });
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = 'جاري الحفظ في السحابة...';
-
-            // دمج اللغتين في قيمة واحدة ليتم تخزينها في جوجل شيت وعرضها في التقرير
-            const formData = {
-                leaveId: leaveIdVal,
-                duration: document.getElementById('duration').value,
-                admissionDate: document.getElementById('admissionDate').value,
-                dischargeDate: document.getElementById('dischargeDate').value,
-                issueDate: document.getElementById('issueDate').value,
-                patientName: document.getElementById('patientName_ar').value + " / " + document.getElementById('patientName_en').value,
-                nationalId: nationalIdVal + " ", // إضافة مسافة لإجبار جوجل شيت على حفظه كنص وحماية الأصفار
-                nationality: document.getElementById('nationality_ar').value + " / " + document.getElementById('nationality_en').value,
-                employer: document.getElementById('employer_ar').value + " / " + document.getElementById('employer_en').value,
-                practitionerName: document.getElementById('practitionerName_ar').value + " / " + document.getElementById('practitionerName_en').value,
-                position: document.getElementById('position_ar').value + " / " + document.getElementById('position_en').value,
-                hospitalName: document.getElementById('hospitalName_ar').value + " / " + document.getElementById('hospitalName_en').value,
-                createdAt: new Date().toISOString()
-            };
-
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-
-                statusMsg.innerHTML = `
-                    <div style="background-color: #e6f7ed; color: #155724; border: 1px solid #c3e6cb; padding: 25px; border-radius: 10px; margin-top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                        <h4 style="margin-top: 0;">✅ تم حفظ البيانات بنجاح!</h4>
-                        <p style="margin-bottom: 15px;">الآن يمكنك عرض التقرير الرسمي ومشاركته كملف PDF.</p>
-                        <a href="report.html?id=${formData.leaveId}" target="_blank" 
-                           style="display: inline-block; background: var(--primary-color); color: white; text-decoration: none; padding: 12px 30px; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                            فتح التقرير للطباعة والمشاركة
-                        </a>
+    <!-- Footer -->
+    <footer id="footer" class="bg-slate-900 text-white py-16">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xl">
+                            <i class="fas fa-hand-holding-heart"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold"> مؤسسة ليان لأجل الإنسان </h2>
                     </div>
-                `;
-                form.reset();
-                await loadHistory(); // تحديث السجل فوراً بعد الحفظ لضمان منع التكرار في العملية القادمة
-            } catch (error) {
-                statusMsg.innerHTML = '<p class="alert">حدث خطأ أثناء الحفظ.</p>';
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'حفظ وإصدار التقرير';
-            }
-        });
-    </script>
+                    <p class="text-slate-300 mb-6 leading-relaxed text-sm">
+                    انطلاقةٌ من أجل الإنسان.. من قلب الرقة وإليها.<br>
+                    مؤسسة تنموية، إغاثية، وإنسانية، ولدت من رحم الاحتياج في مناطقنا (الرقة، الطبقة، والمنصورة). نحن هنا لنكون يداً تبني السكن، وعقلاً ينمي القدرات، وقلباً يرعى الصحة والدعم النفسي.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-600 transition-all"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-400 transition-all"><i
+                                class="fab fa-twitter"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-600 transition-all"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-red-600 transition-all"><i
+                                class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold mb-6">روابط سريعة</h5>
+                    <ul class="space-y-4 text-slate-400">
+                        <li><a href="#home" class="hover:text-blue-400 transition-all">الرئيسية</a></li>
+                        <li><a href="#about" class="hover:text-blue-400 transition-all">من نحن</a></li>
+                        <li><a href="#projects" class="hover:text-blue-400 transition-all">مشاريعنا</a></li>
+                        <li><a href="#media" class="hover:text-blue-400 transition-all">المركز الإعلامي</a></li>
+                        <li><a href="#footer" class="hover:text-blue-400 transition-all">تواصل معنا</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold mb-6">اتصل بنا</h5>
+                    <ul class="space-y-4 text-slate-400">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-map-marker-alt mt-1 text-blue-500"></i>
+                            <span> 📍 المقر الرئيسي: الرقة - ناحية المنصورة.<br>
+                                👥 نطاق العمل: (المنصورة - الرقة - الطبقة).
+                            </span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-phone text-blue-500"></i>
+                            <span>+963 ***********</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-blue-500"></i>
+                            <span>info@layan.org</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-slate-800 text-center text-slate-500 text-sm relative">
+                <p>جميع الحقوق محفوظة &copy; 2026 مؤسسة ليان لأجل الإنسان تنفيذ أ: نبيل الحميد </p>
+                <a href="login.html" class="absolute left-2 top-8 text-slate-800 hover:text-slate-400 transition-colors p-2 cursor-default" title="الإدارة">
+                    <i class="fas fa-circle text-[8px] opacity-20 hover:opacity-100"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
